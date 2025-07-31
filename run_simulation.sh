@@ -166,7 +166,8 @@ echo "Compiling offloading policies..."
 javac -cp "target/classes:libs/cloudsim-3.0.3.jar:libs/cloudsim-examples-3.0.3.jar:libs/commons-math3-3.5.jar:libs/json-simple-1.1.1.jar:libs/guava-18.0.jar" \
       -d target/classes \
       src/main/java/org/fogcomputing/algorithms/EnergyAwareOffloadingPolicy.java \
-      src/main/java/org/fogcomputing/algorithms/DeadlineAwareOffloadingPolicy.java
+      src/main/java/org/fogcomputing/algorithms/DeadlineAwareOffloadingPolicy.java \
+      src/main/java/org/fogcomputing/algorithms/MCEETOOffloadingPolicy.java
 
 if [ $? -ne 0 ]; then
   echo "Failed to compile offloading policies"

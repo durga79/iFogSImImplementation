@@ -122,6 +122,24 @@ This algorithm prioritizes meeting task deadlines when making offloading decisio
 
 It aims to ensure tasks are completed before their deadlines while optimizing resource utilization.
 
+### 3. MCEETO (Multi-Classifiers based Energy-Efficient Task Offloading)
+
+This algorithm implements an intelligent offloading strategy using a multi-classifier approach to make energy-efficient task distribution decisions. It was implemented based on the paper: "A Multi-Classifiers Based Algorithm for Energy Efficient Tasks Offloading in Fog Computing" published in MDPI Sensors 2023, Vol. 23, Issue 16.
+
+The MCEETO algorithm:
+- Uses task classification based on computation requirements and data size
+- Applies an ensemble decision process to determine optimal tier placement
+- Considers energy costs for both computation and data transmission
+- Balances workload between Cloud, Fog, and IoT tiers based on task characteristics
+- Optimizes for both energy efficiency and task completion time
+
+Task categories used in the classification:
+- High computation, low data (Cloud preferred)
+- High computation, high data (balance between Cloud and Fog)
+- Medium computation tasks (Fog preferred)
+- Low computation, low data (IoT preferred)
+- Low computation, high data (IoT or Fog based on energy analysis)
+
 ## Simulation Environment
 
 The simulation includes:

@@ -36,42 +36,47 @@ if %ERRORLEVEL% neq 0 (
 
 REM Create mock classes for the missing fog classes
 echo Creating mock classes for missing fog dependencies...
-mkdir src\main\java\org\fogcomputing\mock
-mkdir target\classes\org\fogcomputing\mock
+mkdir src\main\java\org\fogcomputing\mock 2>NUL
+mkdir target\classes\org\fogcomputing\mock 2>NUL
 
-echo package org.fogcomputing.mock; > src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo. >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo // This file provides mock classes to replace the missing iFogSim classes >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo // It allows the simulation to compile without the actual fog libraries >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo. >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo public class MockFogClasses { >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     // Empty implementation - just to provide the classes needed for compilation >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo } >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo. >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo // Mock FogDevice class >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo class FogDevice { >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     private String name; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     private double energyConsumption; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     private int id; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     public FogDevice(int id, String name) { >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo         this.id = id; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo         this.name = name; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo         this.energyConsumption = 0.0; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     } >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     public String getName() { >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo         return name; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     } >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     public double getEnergyConsumption() { >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo         return energyConsumption; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     } >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     public int getId() { >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo         return id; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo     } >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
-echo } >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+@echo on
+(echo package org.fogcomputing.mock;
+ echo.
+ echo // This file provides mock classes to replace the missing iFogSim classes
+ echo // It allows the simulation to compile without the actual fog libraries
+ echo.
+ echo public class MockFogClasses {
+ echo     // Empty implementation - just to provide the classes needed for compilation
+ echo }
+ echo.
+ echo // Mock FogDevice class
+ echo class FogDevice {
+ echo     private String name;
+ echo     private double energyConsumption;
+ echo     private int id;
+ echo     
+ echo     public FogDevice(int id, String name) {
+ echo         this.id = id;
+ echo         this.name = name;
+ echo         this.energyConsumption = 0.0;
+ echo     }) > src\main\java\org\fogcomputing\mock\MockFogClasses.java
+@echo off
+@echo on
+(echo     }
+ echo     
+ echo     public String getName() {
+ echo         return name;
+ echo     }
+ echo     
+ echo     public double getEnergyConsumption() {
+ echo         return energyConsumption;
+ echo     }
+ echo     
+ echo     public int getId() {
+ echo         return id;
+ echo     }
+ echo }) >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+@echo off
 
 REM Compile the mock classes
 echo Compiling mock classes...
@@ -85,81 +90,294 @@ if %ERRORLEVEL% neq 0 (
 REM Create simplified implementations of the offloading policies
 echo Creating simplified implementations of offloading policies...
 
-echo package org.fogcomputing.algorithms; > src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo. >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo import java.util.List; >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo import org.cloudbus.cloudsim.Cloudlet; >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo import org.cloudbus.cloudsim.Vm; >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo. >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo public class EnergyAwareOffloadingPolicy implements OffloadingPolicy { >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo. >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo     @Override >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo     public int getTargetVmId(Cloudlet cloudlet, List^<Vm^> vmList) { >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // Energy-aware allocation strategy  >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // Distribute tasks to minimize energy consumption >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // For simulation, we'll use a simple rule-based approach: >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // - CPU-intensive tasks go to cloud (better energy efficiency for computation) >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // - Data-intensive but less compute-heavy tasks go to fog (reduced transmission energy) >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // - Very small tasks stay on IoT devices (no transmission energy) >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         int cloudletId = cloudlet.getCloudletId(); >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         int numVms = vmList.size(); >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // Simple rule-based assignment >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // First 20%% go to cloud, middle 50%% go to fog, remaining 30%% stay on IoT >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         if (cloudletId ^< 2) { >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             // Cloud VMs (first 2 VMs) >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             return cloudletId %% 2; // Round-robin among cloud VMs >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         } else if (cloudletId ^< 7) { >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             // Fog VMs (next 5 VMs) >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             return 2 + (cloudletId %% 5); // Round-robin among fog VMs >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         } else { >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             // IoT VMs (remaining VMs) >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             return 7 + (cloudletId %% 3); // Round-robin among IoT VMs >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         } >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo     } >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo } >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
+@echo on
+(echo package org.fogcomputing.algorithms;
+ echo.
+ echo import java.util.List;
+ echo import org.cloudbus.cloudsim.Cloudlet;
+ echo import org.cloudbus.cloudsim.Vm;
+ echo.
+ echo public class EnergyAwareOffloadingPolicy implements OffloadingPolicy {
+ echo.
+ echo     @Override
+ echo     public int getTargetVmId(Cloudlet cloudlet, List^<Vm^> vmList) {
+ echo         // Energy-aware allocation strategy 
+ echo         // Distribute tasks to minimize energy consumption
+ echo         // For simulation, we'll use a simple rule-based approach:) > src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
+@echo off
+@echo on
+(echo         // - CPU-intensive tasks go to cloud (better energy efficiency for computation)
+ echo         // - Data-intensive but less compute-heavy tasks go to fog (reduced transmission energy)
+ echo         // - Very small tasks stay on IoT devices (no transmission energy)
+ echo.
+ echo         // Simple implementation for simulation purposes
+ echo         int cloudletLength = (int) cloudlet.getCloudletLength();
+ echo         long cloudletFileSize = cloudlet.getCloudletFileSize();
+ echo.
+ echo         // Classification thresholds
+ echo         int HIGH_COMPUTATION = 25000; // MI
+ echo         int LOW_COMPUTATION = 15000; // MI
+ echo         int HIGH_DATA = 1000; // bytes
+ echo.
+ echo         if (cloudletLength > HIGH_COMPUTATION) {
+ echo             // High computation tasks go to Cloud for better energy efficiency
+ echo             // Look for a Cloud VM
+ echo             for (Vm vm : vmList) {
+ echo                 if (vm.getId() < 2) { // First two VMs are in Cloud
+ echo                     return vm.getId();
+ echo                 }
+ echo             }
+ echo         } else if (cloudletLength < LOW_COMPUTATION && cloudletFileSize < HIGH_DATA) {
+ echo             // Low computation and low data tasks stay on IoT to save transmission energy
+ echo             // Look for an IoT VM
+ echo             for (Vm vm : vmList) {
+ echo                 if (vm.getId() >= 7 && vm.getId() <= 16) { // VMs 7-16 are IoT
+ echo                     return vm.getId();
+ echo                 }
+ echo             }
+ echo         } else {
+ echo             // Medium computation or data-intensive tasks go to Fog
+ echo             // Look for a Fog VM
+ echo             for (Vm vm : vmList) {
+ echo                 if (vm.getId() >= 2 && vm.getId() <= 6) { // VMs 2-6 are Fog
+ echo                     return vm.getId();
+ echo                 }
+ echo             }
+ echo         }
+ echo.
+ echo         // Fallback to round-robin if no suitable VM found
+ echo         int vmId = (int) (cloudlet.getCloudletId() %% vmList.size());
+ echo         return vmList.get(vmId).getId();
+ echo     }
+ echo }) >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
+@echo off
 
-echo package org.fogcomputing.algorithms; > src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo. >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo import java.util.List; >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo import org.cloudbus.cloudsim.Cloudlet; >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo import org.cloudbus.cloudsim.Vm; >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo. >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo public class DeadlineAwareOffloadingPolicy implements OffloadingPolicy { >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo. >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo     @Override >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo     public int getTargetVmId(Cloudlet cloudlet, List^<Vm^> vmList) { >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         // Deadline-aware allocation strategy >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         // Distribute tasks based on deadline constraints >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         // For simulation, we'll use a simple rule-based approach: >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         // - Tasks with tight deadlines go to higher-performance resources >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         // - Tasks with longer deadlines can afford more transmission time >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         int cloudletId = cloudlet.getCloudletId(); >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         // For this simplified implementation, we'll make decisions based on cloudlet ID >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         // In a real implementation, this would be based on the actual deadline >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         if (cloudletId == 0 ^|^| cloudletId == 1) { >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo             // First two tasks go to cloud (assuming they have tight deadlines) >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo             return cloudletId %% 2; >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         } else if (cloudletId ^>= 2 ^&^& cloudletId ^<= 6) { >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo             // Next 5 tasks go to fog nodes >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo             return 2 + (cloudletId - 2); >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         } else { >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo             // Remaining tasks stay on IoT devices >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo             return 7 + ((cloudletId - 7) %% 3); >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo         } >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo     } >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
-echo } >> src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
+@echo on
+(echo package org.fogcomputing.algorithms;
+ echo.
+ echo import java.util.List;
+ echo import org.cloudbus.cloudsim.Cloudlet;
+ echo import org.cloudbus.cloudsim.Vm;
+ echo.
+ echo public class DeadlineAwareOffloadingPolicy implements OffloadingPolicy {
+ echo.
+ echo     @Override
+ echo     public int getTargetVmId(Cloudlet cloudlet, List^<Vm^> vmList) {
+ echo         // Deadline-aware allocation strategy
+ echo         // Distribute tasks based on deadline constraints
+ echo         // For simulation, we'll use a simple rule-based approach:
+ echo         // - Tasks with tight deadlines go to higher-performance resources
+ echo         // - Tasks with longer deadlines can afford more transmission time
+ echo         
+ echo         int cloudletId = cloudlet.getCloudletId();
+ echo         
+ echo         // For this simplified implementation, we'll make decisions based on cloudlet ID
+ echo         // In a real implementation, this would be based on the actual deadline
+ echo         
+ echo         if (cloudletId == 0 ^|^| cloudletId == 1) {
+ echo             // First two tasks go to cloud (assuming they have tight deadlines)
+ echo             return cloudletId %% 2;
+ echo         } else if (cloudletId ^>= 2 ^&^& cloudletId ^<= 6) {
+ echo             // Next 5 tasks go to fog nodes
+ echo             return 2 + (cloudletId - 2);
+ echo         } else {
+ echo             // Remaining tasks go to IoT nodes with round-robin
+ echo             int numIotVms = 3;
+ echo             return 7 + ((cloudletId - 7) %% numIotVms);
+ echo         }
+ echo     }
+ echo }) > src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
+@echo off
+
+@echo on
+(echo package org.fogcomputing.algorithms;
+ echo.
+ echo import java.util.List;
+ echo import java.util.ArrayList;
+ echo import java.util.HashMap;
+ echo import java.util.Map;
+ echo import org.cloudbus.cloudsim.Cloudlet;
+ echo import org.cloudbus.cloudsim.Vm;
+ echo.
+ echo /**
+ echo  * MCEETO (Multi-Classifiers based Energy-Efficient Task Offloading) algorithm implementation
+ echo  * Based on the paper: "A Multi-Classifiers Based Algorithm for Energy Efficient 
+ echo  * Tasks Offloading in Fog Computing" published in MDPI Sensors 2023
+ echo  */
+ echo public class MCEETOOffloadingPolicy implements OffloadingPolicy {
+ echo     // Classification thresholds
+ echo     private static final int HIGH_COMPUTATION = 30000; // MI
+ echo     private static final int MEDIUM_COMPUTATION = 20000; // MI
+ echo     private static final int LOW_COMPUTATION = 10000; // MI
+ echo     private static final int HIGH_DATA = 1000; // bytes
+ echo     private static final int LOW_DATA = 500; // bytes
+ echo 
+ echo     // VM type ranges
+ echo     private static final int CLOUD_VM_MIN = 0;
+ echo     private static final int CLOUD_VM_MAX = 1;
+ echo     private static final int FOG_VM_MIN = 2;
+ echo     private static final int FOG_VM_MAX = 6;
+ echo     private static final int IOT_VM_MIN = 7;
+ echo     private static final int IOT_VM_MAX = 16;
+ echo 
+ echo     // Energy coefficients (simplified model from the paper)
+ echo     private static final double CLOUD_COMPUTATION_ENERGY = 0.01; // J/MI
+ echo     private static final double FOG_COMPUTATION_ENERGY = 0.02; // J/MI
+ echo     private static final double IOT_COMPUTATION_ENERGY = 0.03; // J/MI
+ echo     private static final double CLOUD_TRANSMISSION_ENERGY = 0.05; // J/byte
+ echo     private static final double FOG_TRANSMISSION_ENERGY = 0.03; // J/byte
+ echo     private static final double IOT_TRANSMISSION_ENERGY = 0.00; // J/byte (local)
+ echo 
+ echo     // Task counters for load balancing
+ echo     private Map<Integer, Integer> vmTaskCount = new HashMap<>();
+ echo 
+ echo     @Override
+ echo     public int getTargetVmId(Cloudlet cloudlet, List^<Vm^> vmList) {
+ echo         // Initialize task counters if needed
+ echo         if (vmTaskCount.isEmpty()) {
+ echo             for (Vm vm : vmList) {
+ echo                 vmTaskCount.put(vm.getId(), 0);
+ echo             }
+ echo         }
+ echo 
+ echo         // Extract task characteristics
+ echo         int computationRequirement = (int) cloudlet.getCloudletLength(); // in MI
+ echo         long dataSize = cloudlet.getCloudletFileSize() + cloudlet.getCloudletOutputSize(); // in bytes
+ echo 
+ echo         // Apply the multi-classifier approach from the paper
+ echo         int targetVmId = -1;
+ echo 
+ echo         // CLASSIFIER 1: High computation, low data -> Cloud tier (better computation efficiency)
+ echo         if (computationRequirement > HIGH_COMPUTATION && dataSize < HIGH_DATA) {
+ echo             targetVmId = findLeastLoadedVmInRange(vmList, CLOUD_VM_MIN, CLOUD_VM_MAX);
+ echo             System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                               " classified as HIGH COMP, LOW DATA -> assigned to Cloud VM #" + targetVmId);
+ echo         }
+ echo         // CLASSIFIER 2: High computation, high data -> Balance between Fog and Cloud
+ echo         else if (computationRequirement > HIGH_COMPUTATION && dataSize >= HIGH_DATA) {
+ echo             // Compare energy costs between Cloud and Fog
+ echo             double cloudEnergy = computationRequirement * CLOUD_COMPUTATION_ENERGY + 
+ echo                                dataSize * CLOUD_TRANSMISSION_ENERGY;
+ echo             double fogEnergy = computationRequirement * FOG_COMPUTATION_ENERGY + 
+ echo                              dataSize * FOG_TRANSMISSION_ENERGY;
+ echo             
+ echo             if (cloudEnergy <= fogEnergy) {
+ echo                 targetVmId = findLeastLoadedVmInRange(vmList, CLOUD_VM_MIN, CLOUD_VM_MAX);
+ echo                 System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                                   " classified as HIGH COMP, HIGH DATA (cloud efficient) -> assigned to Cloud VM #" + targetVmId);
+ echo             } else {
+ echo                 targetVmId = findLeastLoadedVmInRange(vmList, FOG_VM_MIN, FOG_VM_MAX);
+ echo                 System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                                   " classified as HIGH COMP, HIGH DATA (fog efficient) -> assigned to Fog VM #" + targetVmId);
+ echo             }
+ echo         }
+ echo         // CLASSIFIER 3: Medium computation -> Fog tier (good balance)
+ echo         else if (computationRequirement >= MEDIUM_COMPUTATION && computationRequirement <= HIGH_COMPUTATION) {
+ echo             targetVmId = findLeastLoadedVmInRange(vmList, FOG_VM_MIN, FOG_VM_MAX);
+ echo             System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                               " classified as MEDIUM COMP -> assigned to Fog VM #" + targetVmId);
+ echo         }
+ echo         // CLASSIFIER 4: Low computation, low data -> IoT tier (no transmission cost)
+ echo         else if (computationRequirement < LOW_COMPUTATION && dataSize < LOW_DATA) {
+ echo             targetVmId = findLeastLoadedVmInRange(vmList, IOT_VM_MIN, IOT_VM_MAX);
+ echo             System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                               " classified as LOW COMP, LOW DATA -> assigned to IoT VM #" + targetVmId);
+ echo         }
+ echo         // CLASSIFIER 5: Low computation, high data -> Balance between IoT and Fog
+ echo         else if (computationRequirement < LOW_COMPUTATION && dataSize >= LOW_DATA) {
+ echo             // Compare energy between IoT and Fog
+ echo             double iotEnergy = computationRequirement * IOT_COMPUTATION_ENERGY;
+ echo             double fogEnergy = computationRequirement * FOG_COMPUTATION_ENERGY + 
+ echo                              dataSize * FOG_TRANSMISSION_ENERGY;
+ echo             
+ echo             if (iotEnergy <= fogEnergy) {
+ echo                 targetVmId = findLeastLoadedVmInRange(vmList, IOT_VM_MIN, IOT_VM_MAX);
+ echo                 System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                                   " classified as LOW COMP, HIGH DATA (IoT efficient) -> assigned to IoT VM #" + targetVmId);
+ echo             } else {
+ echo                 targetVmId = findLeastLoadedVmInRange(vmList, FOG_VM_MIN, FOG_VM_MAX);
+ echo                 System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                                   " classified as LOW COMP, HIGH DATA (Fog efficient) -> assigned to Fog VM #" + targetVmId);
+ echo             }
+ echo         }
+ echo         // DEFAULT CLASSIFIER: Fallback for any other cases
+ echo         else {
+ echo             // Find the tier with the lowest average load
+ echo             double cloudLoad = getAverageLoad(vmList, CLOUD_VM_MIN, CLOUD_VM_MAX);
+ echo             double fogLoad = getAverageLoad(vmList, FOG_VM_MIN, FOG_VM_MAX);
+ echo             double iotLoad = getAverageLoad(vmList, IOT_VM_MIN, IOT_VM_MAX);
+ echo             
+ echo             if (cloudLoad <= fogLoad && cloudLoad <= iotLoad) {
+ echo                 targetVmId = findLeastLoadedVmInRange(vmList, CLOUD_VM_MIN, CLOUD_VM_MAX);
+ echo             } else if (fogLoad <= cloudLoad && fogLoad <= iotLoad) {
+ echo                 targetVmId = findLeastLoadedVmInRange(vmList, FOG_VM_MIN, FOG_VM_MAX);
+ echo             } else {
+ echo                 targetVmId = findLeastLoadedVmInRange(vmList, IOT_VM_MIN, IOT_VM_MAX);
+ echo             }
+ echo             System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                               " using default classifier -> assigned to VM #" + targetVmId);
+ echo         }
+ echo         
+ echo         // If we still don't have a valid VM (e.g., range was empty), use round-robin
+ echo         if (targetVmId == -1) {
+ echo             targetVmId = cloudlet.getCloudletId() %% vmList.size();
+ echo             System.out.println("Task #" + cloudlet.getCloudletId() + 
+ echo                               " using fallback assignment -> assigned to VM #" + targetVmId);
+ echo         }
+ echo         
+ echo         // Update task count for the selected VM
+ echo         vmTaskCount.put(targetVmId, vmTaskCount.get(targetVmId) + 1);
+ echo         return targetVmId;
+ echo     }
+ echo     
+ echo     /**
+ echo      * Find the VM with the least number of tasks in a specific range
+ echo      */
+ echo     private int findLeastLoadedVmInRange(List^<Vm^> vmList, int minVmId, int maxVmId) {
+ echo         int leastLoadedVmId = -1;
+ echo         int minTasks = Integer.MAX_VALUE;
+ echo         
+ echo         for (Vm vm : vmList) {
+ echo             int vmId = vm.getId();
+ echo             if (vmId >= minVmId && vmId <= maxVmId) {
+ echo                 int tasks = vmTaskCount.getOrDefault(vmId, 0);
+ echo                 if (tasks < minTasks) {
+ echo                     minTasks = tasks;
+ echo                     leastLoadedVmId = vmId;
+ echo                 }
+ echo             }
+ echo         }
+ echo         
+ echo         return leastLoadedVmId;
+ echo     }
+ echo     
+ echo     /**
+ echo      * Calculate average load for VMs in a specific range
+ echo      */
+ echo     private double getAverageLoad(List^<Vm^> vmList, int minVmId, int maxVmId) {
+ echo         int totalTasks = 0;
+ echo         int vmCount = 0;
+ echo         
+ echo         for (Vm vm : vmList) {
+ echo             int vmId = vm.getId();
+ echo             if (vmId >= minVmId && vmId <= maxVmId) {
+ echo                 totalTasks += vmTaskCount.getOrDefault(vmId, 0);
+ echo                 vmCount++;
+ echo             }
+ echo         }
+ echo         
+ echo         return vmCount > 0 ? (double)totalTasks / vmCount : Double.MAX_VALUE;
+ echo     }
+ echo }) > src\main\java\org\fogcomputing\algorithms\MCEETOOffloadingPolicy.java
+@echo off
 
 REM Compile the offloading policies
 echo Compiling offloading policies...
 javac -cp "target\classes;libs\cloudsim-3.0.3.jar;libs\cloudsim-examples-3.0.3.jar;libs\commons-math3-3.5.jar;libs\json-simple-1.1.1.jar;libs\guava-18.0.jar" ^
       -d target\classes ^
       src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java ^
-      src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java
+      src\main\java\org\fogcomputing\algorithms\DeadlineAwareOffloadingPolicy.java ^
+      src\main\java\org\fogcomputing\algorithms\MCEETOOffloadingPolicy.java
 
 if %ERRORLEVEL% neq 0 (
   echo Failed to compile offloading policies

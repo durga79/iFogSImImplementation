@@ -39,6 +39,7 @@ import org.fogcomputing.TieredDatacenterBroker;
 import org.fogcomputing.algorithms.OffloadingPolicy;
 import org.fogcomputing.algorithms.EnergyAwareOffloadingPolicy;
 import org.fogcomputing.algorithms.DeadlineAwareOffloadingPolicy;
+import org.fogcomputing.algorithms.MCEETOOffloadingPolicy;
 
 /**
  * A CloudSim implementation of Fog/Edge Computing Task Offloading
@@ -77,6 +78,9 @@ public class CloudSimTaskOffloadingSimulation {
             // Run with deadline-aware policy 
             runSimulation("Deadline-Aware Offloading");
             
+            // Run with MCEETO policy (Multi-Classifiers based Energy-Efficient Task Offloading)
+            runSimulation("MCEETO Offloading");
+            
         } catch (Exception e) {
             e.printStackTrace();
             Log.printLine("Simulation terminated due to an unexpected error.");
@@ -87,6 +91,7 @@ public class CloudSimTaskOffloadingSimulation {
      * Run simulation with the specified offloading policy.
      * 
      * @param policyName the name of the offloading policy to use
+     * Valid options: "Energy-Aware Offloading", "Deadline-Aware Offloading", "MCEETO Offloading"
      */
     private static void runSimulation(String policyName) throws Exception {
         Log.printLine("\n==================================");
@@ -164,8 +169,21 @@ public class CloudSimTaskOffloadingSimulation {
         OffloadingPolicy policy;
         if (policyName.equals("Energy-Aware Offloading")) {
             policy = new EnergyAwareOffloadingPolicy();
-        } else {
+            System.out.println("Using Energy-Aware Offloading Policy");
+        } else if (policyName.equals("Deadline-Aware Offloading")) {
             policy = new DeadlineAwareOffloadingPolicy();
+            System.out.println("Using Deadline-Aware Offloading Policy");
+        } else if (policyName.equals("MCEETO Offloading")) {
+            // Using the Multi-Classifiers based Energy-Efficient Task Offloading algorithm
+            // Based on the 2023 MDPI paper
+            policy = new MCEETOOffloadingPolicy();
+            System.out.println("Using Multi-Classifiers based Energy-Efficient Task Offloading (MCEETO) Policy");
+            System.out.println("Reference: 'A Multi-Classifiers Based Algorithm for Energy Efficient Tasks Offloading in Fog Computing'");
+            System.out.println("Published in MDPI Sensors 2023, Vol. 23, Issue 16");
+        } else {
+            // Default to Energy-Aware policy
+            policy = new EnergyAwareOffloadingPolicy();
+            System.out.println("Unknown policy name: " + policyName + ", defaulting to Energy-Aware Offloading Policy");
         }
         
         // Use a completely different approach to VM creation and cloudlet submission
