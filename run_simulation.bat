@@ -40,40 +40,40 @@ echo Creating mock classes for missing fog dependencies...
 mkdir src\main\java\org\fogcomputing\mock 2>NUL
 mkdir target\classes\org\fogcomputing\mock 2>NUL
 
-REM Write MockFogClasses.java directly with a single command to avoid echo issues
-(echo package org.fogcomputing.mock;
- echo.
- echo // This file provides mock classes to replace the missing iFogSim classes
- echo // It allows the simulation to compile without the actual fog libraries
- echo.
- echo public class MockFogClasses {
- echo     // Empty implementation - just to provide the classes needed for compilation
- echo }
- echo.
- echo // Mock FogDevice class
- echo class FogDevice {
- echo     private String name;
- echo     private double energyConsumption;
- echo     private int id;
- echo     
- echo     public FogDevice(int id, String name) {
- echo         this.id = id;
- echo         this.name = name;
- echo         this.energyConsumption = 0.0;
- echo     }
- echo     
- echo     public String getName() {
- echo         return name;
- echo     }
- echo     
- echo     public double getEnergyConsumption() {
- echo         return energyConsumption;
- echo     }
- echo     
- echo     public int getId() {
- echo         return id;
- echo     }
- echo }) > src\main\java\org\fogcomputing\mock\MockFogClasses.java
+REM Create MockFogClasses.java by writing the raw content line by line
+echo package org.fogcomputing.mock; > src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo. >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo // This file provides mock classes to replace the missing iFogSim classes >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo // It allows the simulation to compile without the actual fog libraries >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo. >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo public class MockFogClasses ^{ >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     // Empty implementation - just to provide the classes needed for compilation >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo ^} >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo. >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo // Mock FogDevice class >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo class FogDevice ^{ >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     private String name; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     private double energyConsumption; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     private int id; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     public FogDevice^(int id, String name^) ^{ >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo         this.id = id; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo         this.name = name; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo         this.energyConsumption = 0.0; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     ^} >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     public String getName^(^) ^{ >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo         return name; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     ^} >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     public double getEnergyConsumption^(^) ^{ >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo         return energyConsumption; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     ^} >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     public int getId^(^) ^{ >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo         return id; >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo     ^} >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
+echo ^} >> src\main\java\org\fogcomputing\mock\MockFogClasses.java
 
 REM Compile the mock classes
 echo Compiling mock classes...
@@ -123,24 +123,6 @@ REM Create EnergyAwareOffloadingPolicy.java with proper escaping - using grouped
  echo         return vmList.get(vmId).getId();
  echo     }
  echo }) > src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo                     return vm.getId(); >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo                 ^} >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             ^} >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         ^} else ^{ >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             // Medium computation or data-intensive tasks go to Fog >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             // Look for a Fog VM >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             for (Vm vm : vmList) ^{ >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo                 if (vm.getId() ^>= 2 ^&^& vm.getId() ^<= 6) ^{ // VMs 2-6 are Fog >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo                     return vm.getId(); >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo                 ^} >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo             ^} >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         ^} >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo. >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         // Fallback to round-robin if no suitable VM found >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         int vmId = (int) (cloudlet.getCloudletId() %% vmList.size()); >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo         return vmList.get(vmId).getId(); >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo     ^} >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
-echo ^} >> src\main\java\org\fogcomputing\algorithms\EnergyAwareOffloadingPolicy.java
 
 REM Create DeadlineAwareOffloadingPolicy.java using grouped echo to prevent ECHO is off errors
 (echo package org.fogcomputing.algorithms;
@@ -432,12 +414,12 @@ REM Create and compile test file writer
 echo Testing file writing capability...
 echo package org.fogcomputing; > src\main\java\org\fogcomputing\TestFileWriter.java
 echo. >> src\main\java\org\fogcomputing\TestFileWriter.java
-echo public class TestFileWriter { >> src\main\java\org\fogcomputing\TestFileWriter.java
-echo     public static void main(String[] args) { >> src\main\java\org\fogcomputing\TestFileWriter.java
+echo public class TestFileWriter ^{ >> src\main\java\org\fogcomputing\TestFileWriter.java
+echo     public static void main^(String[] args^) ^{ >> src\main\java\org\fogcomputing\TestFileWriter.java
 echo         // Call the testFileWriting method in SimulationResultProcessor >> src\main\java\org\fogcomputing\TestFileWriter.java
-echo         SimulationResultProcessor.testFileWriting(); >> src\main\java\org\fogcomputing\TestFileWriter.java
-echo     } >> src\main\java\org\fogcomputing\TestFileWriter.java
-echo } >> src\main\java\org\fogcomputing\TestFileWriter.java
+echo         SimulationResultProcessor.testFileWriting^(^); >> src\main\java\org\fogcomputing\TestFileWriter.java
+echo     ^} >> src\main\java\org\fogcomputing\TestFileWriter.java
+echo ^} >> src\main\java\org\fogcomputing\TestFileWriter.java
 
 javac -cp "target\classes;libs\cloudsim-3.0.3.jar;libs\cloudsim-examples-3.0.3.jar;libs\commons-math3-3.5.jar;libs\json-simple-1.1.1.jar;libs\guava-18.0.jar" ^
       -d target\classes src\main\java\org\fogcomputing\TestFileWriter.java
