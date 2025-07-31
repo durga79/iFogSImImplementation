@@ -1,0 +1,690 @@
+package org.fogcomputing;
+
+import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.CloudSim;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
+import org.cloudbus.cloudsim.Datacenter;
+import org.cloudbus.cloudsim.DatacenterBroker;
+import org.cloudbus.cloudsim.DatacenterCharacteristics;
+import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.NetworkTopology;
+import org.cloudbus.cloudsim.Pe;
+import org.cloudbus.cloudsim.Storage;
+import org.cloudbus.cloudsim.UtilizationModel;
+import org.cloudbus.cloudsim.UtilizationModelFull;
+import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.VmAllocationPolicySimple;
+import org.cloudbus.cloudsim.VmSchedulerTimeShared;
+import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
+import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
+import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
+import org.fogcomputing.algorithms.OffloadingPolicy;
+import org.fogcomputing.algorithms.EnergyAwareOffloadingPolicy;
+import org.fogcomputing.algorithms.DeadlineAwareOffloadingPolicy;
+
+/**
+ * A CloudSim implementation of Fog/Edge Computing Task Offloading
+ * This simulation demonstrates task offloading between IoT devices, fog nodes, and cloud servers
+ * with different offloading policies (energy-aware and deadline-aware)
+ */
+public class CloudSimTaskOffloadingSimulation {
+
+    /** The cloudlet list. */
+    private static List<Cloudlet> cloudletList;
+
+    /** The vm list. */
+    private static List<Vm> vmList;
+
+    // Device counts
+    private static int NUM_IOT_DEVICES = 10;
+    private static int NUM_FOG_NODES = 5;
+    private static int NUM_CLOUD_HOSTS = 2;
+    
+    // Network latencies (ms)
+    private static double IOT_TO_FOG_LATENCY = 2.0;
+    private static double FOG_TO_CLOUD_LATENCY = 20.0;
+    
+    /**
+     * Creates main() to run this example.
+     *
+     * @param args the args
+     */
+    public static void main(String[] args) {
+        Log.printLine("Starting Task Offloading Simulation using CloudSim...");
+
+        try {
+            // Run with energy-aware policy
+            runSimulation("Energy-Aware Offloading");
+            
+            // Run with deadline-aware policy 
+            runSimulation("Deadline-Aware Offloading");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.printLine("Simulation terminated due to an unexpected error.");
+        }
+    }
+    
+    /**
+     * Run simulation with the specified offloading policy.
+     * 
+     * @param policyName the name of the offloading policy to use
+     */
+    private static void runSimulation(String policyName) throws Exception {
+        Log.printLine("\n==================================");
+        Log.printLine("Running simulation with " + policyName);
+        Log.printLine("==================================\n");
+        
+        // Initialize CloudSim
+        int num_user = 1;   // number of cloud users
+        Calendar calendar = Calendar.getInstance();
+        boolean trace_flag = false;  // trace events
+        
+        CloudSim.init(num_user, calendar, trace_flag);
+
+        // Create datacenters - these represent different tiers
+        Datacenter cloudDatacenter = createCloudDatacenter("CloudDatacenter");
+        Datacenter fogDatacenter = createFogDatacenter("FogDatacenter");
+        Datacenter iotDatacenter = createIoTDatacenter("IoTDatacenter");
+
+        // Create broker that represents a user/application
+        DatacenterBroker broker = createBroker("MainBroker");
+        int brokerId = broker.getId();
+
+        // Create VMs and cloudlets according to the policy
+        if (policyName.equals("Energy-Aware Offloading")) {
+            createVmsAndCloudlets(brokerId, new EnergyAwareOffloadingPolicy());
+        } else {
+            createVmsAndCloudlets(brokerId, new DeadlineAwareOffloadingPolicy());
+        }
+        
+        // Get the IDs of our three datacenters
+        int cloudDatacenterId = cloudDatacenter.getId();
+        int fogDatacenterId = fogDatacenter.getId();
+        int iotDatacenterId = iotDatacenter.getId();
+        
+        // Create separate lists for VMs in each tier
+        List<Vm> cloudVmList = new ArrayList<>();
+        List<Vm> fogVmList = new ArrayList<>();
+        List<Vm> iotVmList = new ArrayList<>();
+        
+        // Divide VMs into their respective tier lists
+        for (Vm vm : vmList) {
+            int vmId = vm.getId();
+            if (vmId < NUM_CLOUD_HOSTS) {
+                // Cloud VMs (0 to NUM_CLOUD_HOSTS-1)
+                cloudVmList.add(vm);
+            } else if (vmId < NUM_CLOUD_HOSTS + NUM_FOG_NODES) {
+                // Fog VMs (NUM_CLOUD_HOSTS to NUM_CLOUD_HOSTS+NUM_FOG_NODES-1)
+                fogVmList.add(vm);
+            } else {
+                // IoT VMs (the rest)
+                iotVmList.add(vm);
+            }
+        }
+        
+        // Map VMs to their specific datacenters
+        Map<Integer, Integer> dcIdByVmId = new HashMap<>();
+        
+        // Set datacenter IDs for each VM
+        for (Vm vm : cloudVmList) {
+            dcIdByVmId.put(vm.getId(), cloudDatacenterId);
+        }
+        for (Vm vm : fogVmList) {
+            dcIdByVmId.put(vm.getId(), fogDatacenterId);
+        }
+        for (Vm vm : iotVmList) {
+            dcIdByVmId.put(vm.getId(), iotDatacenterId);
+        }
+        
+        // Create separate VM lists for submission
+        List<Vm> allVms = new ArrayList<>();
+        
+        // First submit cloud VMs (these will be created in Cloud datacenter)
+        for (Vm vm : cloudVmList) {
+            allVms.add(vm);
+        }
+        
+        // Then submit fog VMs
+        for (Vm vm : fogVmList) {
+            allVms.add(vm);
+        }
+        
+        // Finally submit IoT VMs
+        for (Vm vm : iotVmList) {
+            allVms.add(vm);
+        }
+        
+        // Submit VM list to the broker
+        broker.submitVmList(allVms);
+        
+        // Submit cloudlet list to the broker
+        broker.submitCloudletList(cloudletList);
+        
+        // Configure network topology
+        configureNetworkTopology();
+        
+        // Start simulation
+        CloudSim.startSimulation();
+
+        // Stop simulation
+        CloudSim.stopSimulation();
+
+        // Print results
+        List<Cloudlet> newList = broker.getCloudletReceivedList();
+        printCloudletList(newList, policyName);
+    }
+
+    /**
+     * Creates the cloud datacenter.
+     *
+     * @param name the datacenter name
+     * @return the datacenter
+     */
+    private static Datacenter createCloudDatacenter(String name) {
+        // Create a list to store our machine
+        List<Host> hostList = new ArrayList<Host>();
+
+        // Create Host characteristics - cloud hosts are most powerful
+        int mips = 20000; // Million Instructions Per Second
+        int ram = 65536; // host memory (MB)
+        long storage = 10000000; // host storage (MB)
+        int bw = 100000; // bandwidth (MB/s)
+
+        for (int hostId = 0; hostId < NUM_CLOUD_HOSTS; hostId++) {
+            // Create PEs (Processing Elements/CPU cores)
+            List<Pe> peList = new ArrayList<Pe>();
+            
+            // 16 cores per cloud host, each with high MIPS
+            for (int i = 0; i < 16; i++) { 
+                peList.add(new Pe(i, new PeProvisionerSimple(mips))); 
+            }
+            
+            // Create Host
+            Host host = new Host(
+                hostId,
+                new RamProvisionerSimple(ram),
+                new BwProvisionerSimple(bw),
+                storage,
+                peList,
+                new VmSchedulerTimeShared(peList)
+            );
+            
+            hostList.add(host);
+        }
+
+        // Create a DatacenterCharacteristics object
+        String arch = "x86"; 
+        String os = "Linux"; 
+        String vmm = "Xen";
+        double time_zone = 10.0; 
+        double cost = 3.0; 
+        double costPerMem = 0.05; 
+        double costPerStorage = 0.001; 
+        double costPerBw = 0.01;
+        List<Storage> storageList = new LinkedList<Storage>();
+        try {
+            storageList.add(new org.cloudbus.cloudsim.HarddriveStorage("cloud_storage", 1000000));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
+            arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage, costPerBw);
+
+        // Create a Datacenter
+        Datacenter datacenter = null;
+        try {
+            datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return datacenter;
+    }
+    
+    /**
+     * Creates the fog datacenter with mid-level resources.
+     *
+     * @param name the datacenter name
+     * @return the datacenter
+     */
+    private static Datacenter createFogDatacenter(String name) {
+        List<Host> hostList = new ArrayList<Host>();
+
+        int mips = 4000; // Lower MIPS than cloud
+        int ram = 16384; // Increased RAM for fog (MB)
+        long storage = 500000; // Lower storage than cloud (MB)
+        int bw = 10000; // Lower bandwidth than cloud (MB/s)
+
+        for (int hostId = 0; hostId < NUM_FOG_NODES; hostId++) {
+            List<Pe> peList = new ArrayList<Pe>();
+            
+            for (int i = 0; i < 4; i++) { // 4 cores per fog node
+                peList.add(new Pe(i, new PeProvisionerSimple(mips)));
+            }
+            
+            Host host = new Host(
+                hostId,
+                new RamProvisionerSimple(ram),
+                new BwProvisionerSimple(bw),
+                storage,
+                peList,
+                new VmSchedulerTimeShared(peList)
+            );
+            
+            hostList.add(host);
+        }
+
+        String arch = "ARM";
+        String os = "Linux"; 
+        String vmm = "Xen";
+        double time_zone = 10.0; 
+        double cost = 1.0; // Lower cost than cloud
+        double costPerMem = 0.03; 
+        double costPerStorage = 0.0005; 
+        double costPerBw = 0.005;
+        LinkedList<Storage> storageList = new LinkedList<Storage>();
+        try {
+            storageList.add(new org.cloudbus.cloudsim.HarddriveStorage("fog_storage", 500000));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
+            arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage, costPerBw);
+
+        Datacenter datacenter = null;
+        try {
+            datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return datacenter;
+    }
+    
+    /**
+     * Creates the IoT datacenter with very constrained resources.
+     *
+     * @param name the datacenter name
+     * @return the datacenter
+     */
+    private static Datacenter createIoTDatacenter(String name) {
+        List<Host> hostList = new ArrayList<Host>();
+
+        int mips = 2000; // Increased MIPS for IoT (from 500 to 2000)
+        int ram = 4096; // Increased RAM for IoT (MB) - from 1024 to 4096
+        long storage = 50000; // Increased storage for IoT (MB) - from 32000 to 50000
+        int bw = 1000; // Very low bandwidth for IoT (MB/s)
+
+        for (int hostId = 0; hostId < NUM_IOT_DEVICES; hostId++) {
+            List<Pe> peList = new ArrayList<Pe>();
+            
+            // Only 1 core per IoT device
+            peList.add(new Pe(0, new PeProvisionerSimple(mips)));
+            
+            Host host = new Host(
+                hostId,
+                new RamProvisionerSimple(ram),
+                new BwProvisionerSimple(bw),
+                storage,
+                peList,
+                new VmSchedulerTimeShared(peList)
+            );
+            
+            hostList.add(host);
+        }
+
+        String arch = "ARM";
+        String os = "Linux"; 
+        String vmm = "Embedded";
+        double time_zone = 10.0; 
+        double cost = 0.1; // Very low cost for IoT
+        double costPerMem = 0.01; 
+        double costPerStorage = 0.0001; 
+        double costPerBw = 0.001;
+        LinkedList<Storage> storageList = new LinkedList<Storage>();
+        try {
+            storageList.add(new org.cloudbus.cloudsim.HarddriveStorage("iot_storage", 100000));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
+            arch, os, vmm, hostList, time_zone, cost, costPerMem, costPerStorage, costPerBw);
+
+        Datacenter datacenter = null;
+        try {
+            datacenter = new Datacenter(name, characteristics, new VmAllocationPolicySimple(hostList), storageList, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return datacenter;
+    }
+
+    /**
+     * Creates the broker.
+     *
+     * @param name the broker name
+     * @return the datacenter broker
+     */
+    private static DatacenterBroker createBroker(String name) {
+        DatacenterBroker broker = null;
+        try {
+            broker = new DatacenterBroker(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return broker;
+    }
+
+    /**
+     * Configure network topology with appropriate latencies between datacenter tiers.
+     */
+    private static void configureNetworkTopology() {
+        // Initialize the network topology
+        NetworkTopology.buildNetworkTopology("topology.brite");
+        
+        // Set latencies between datacenters
+        // IoT to Fog
+        NetworkTopology.addLink(1, 2, IOT_TO_FOG_LATENCY, 1000);
+        // Fog to Cloud
+        NetworkTopology.addLink(2, 3, FOG_TO_CLOUD_LATENCY, 10000);
+    }
+    
+    /**
+     * Create VMs and cloudlets according to the offloading policy.
+     *
+     * @param brokerId the broker ID
+     * @param policy the offloading policy
+     */
+    private static void createVmsAndCloudlets(int brokerId, OffloadingPolicy policy) {
+        vmList = new ArrayList<Vm>();
+        cloudletList = new ArrayList<Cloudlet>();
+        
+        // Create VMs for each tier
+        createVMs(brokerId);
+        
+        // Create cloudlets (tasks)
+        for (int i = 0; i < NUM_IOT_DEVICES; i++) {
+            // Each IoT device creates one task
+            Cloudlet cloudlet = createCloudlet(i, brokerId);
+            
+            // Determine target VM using the policy
+            int vmId = policy.getTargetVmId(cloudlet, vmList);
+            cloudlet.setVmId(vmId);
+            
+            cloudletList.add(cloudlet);
+        }
+    }
+    
+    /**
+     * Creates VMs for all tiers (IoT, Fog, Cloud).
+     * Note: Due to a limitation in CloudSim, we're creating a heterogeneous mix of VMs
+     * with different power levels but all compatible with the IoT datacenter
+     * since that's where all VMs are being created.
+     *
+     * @param brokerId the broker ID
+     */
+    private static void createVMs(int brokerId) {
+        // Create simulated Cloud VMs (high power but compatible with IoT hosts)
+        for (int i = 0; i < NUM_CLOUD_HOSTS; i++) {
+            Vm vm = new Vm(
+                i,                          // VM ID
+                brokerId,                   // User ID
+                1000,                       // MIPS - must be compatible with IoT datacenter
+                1,                          // Number of CPUs - must be compatible with IoT datacenter
+                1024,                       // RAM (MB)
+                1000,                       // Bandwidth (higher than regular IoT)
+                10000,                      // Size (MB) - larger than IoT VMs
+                "Xen",                      // VMM
+                new CloudletSchedulerTimeShared() // Scheduler
+            );
+            vmList.add(vm);
+        }
+        
+        // Create simulated Fog VMs (medium power but compatible with IoT hosts)
+        for (int i = NUM_CLOUD_HOSTS; i < NUM_CLOUD_HOSTS + NUM_FOG_NODES; i++) {
+            Vm vm = new Vm(
+                i,                          // VM ID
+                brokerId,                   // User ID
+                1000,                       // MIPS - must be compatible with IoT datacenter
+                1,                          // Number of CPUs - must be compatible with IoT datacenter
+                1024,                       // RAM (MB)
+                500,                        // Bandwidth (medium)
+                8000,                       // Size (MB) - medium storage
+                "Xen",                      // VMM
+                new CloudletSchedulerTimeShared() // Scheduler
+            );
+            vmList.add(vm);
+        }
+        
+        // Create IoT VMs (weakest)
+        for (int i = NUM_CLOUD_HOSTS + NUM_FOG_NODES; i < NUM_CLOUD_HOSTS + NUM_FOG_NODES + NUM_IOT_DEVICES; i++) {
+            Vm vm = new Vm(
+                i,                          // VM ID
+                brokerId,                   // User ID
+                1000,                       // MIPS
+                1,                          // Number of CPUs
+                1024,                       // RAM (MB)
+                100,                        // Bandwidth (low)
+                5000,                       // Size (MB) - small storage
+                "Embedded",                 // VMM
+                new CloudletSchedulerTimeShared() // Scheduler
+            );
+            vmList.add(vm);
+        }
+    }
+    
+    /**
+     * Creates a cloudlet (task).
+     *
+     * @param id the cloudlet ID
+     * @param userId the user ID
+     * @return the cloudlet
+     */
+    private static Cloudlet createCloudlet(int id, int userId) {
+        // Cloudlet properties
+        long length = 10000 + (int)(Math.random() * 40000); // Task length in MI (variable)
+        long fileSize = 500 + (int)(Math.random() * 1500);  // Input file size in bytes (variable)
+        long outputSize = 300 + (int)(Math.random() * 1000); // Output file size in bytes (variable)
+        int pesNumber = 1; // Number of CPUs needed
+        
+        UtilizationModel utilizationModel = new UtilizationModelFull();
+        
+        Cloudlet cloudlet = new Cloudlet(
+            id, 
+            length, 
+            pesNumber, 
+            fileSize, 
+            outputSize, 
+            utilizationModel, 
+            utilizationModel, 
+            utilizationModel
+        );
+        
+        cloudlet.setUserId(userId);
+        
+        // We can't use setRequiredFiles due to protected access
+        // So we'll rely on the cloudlet ID to determine source device
+        // Source device ID = NUM_CLOUD_HOSTS + NUM_FOG_NODES + cloudlet ID
+        
+        // For debugging
+        System.out.println("Created Task " + id + " with length " + length + 
+                       " MI, size " + fileSize + " bytes, originating from IoT device " + 
+                       (NUM_CLOUD_HOSTS + NUM_FOG_NODES + id));
+        
+        return cloudlet;
+    }
+    
+    /**
+     * Processes the Cloudlet objects, saves detailed results to files, and displays only summary in console.
+     * Delegates to SimulationResultProcessor for file output and console display.
+     *
+     * @param list list of Cloudlets
+     * @param policyName the name of the offloading policy used
+     */
+    private static void printCloudletList(List<Cloudlet> list, String policyName) {
+        // Delegate all processing, console output, and file saving to SimulationResultProcessor
+        SimulationResultProcessor.processResults(list, policyName);
+    }
+                detailedWriter.println("Offloading Algorithm: " + policyName);
+                detailedWriter.println(indent + "Total Tasks Generated: " + NUM_IOT_DEVICES);
+                detailedWriter.println(indent + "Total Tasks Completed: " + size);
+                detailedWriter.println(indent + "Success Rate: " + new DecimalFormat("0.00").format(successRate) + "%");
+                
+                detailedWriter.println();
+                detailedWriter.println(indent + "========== Tasks ==========");
+                for (int i = 0; i < size; i++) {
+                    cloudlet = list.get(i);
+                    double executionTime = cloudlet.getFinishTime() - cloudlet.getSubmissionTime();
+                    String vmType = vmTypes.get(cloudlet.getVmId());
+                    double energyFactor = vmType.equals("Cloud") ? 5.0 : (vmType.equals("Fog") ? 3.0 : 1.0);
+                    double taskEnergy = executionTime * energyFactor / 1000.0;
+                    
+                    // Calculate transmission time based on offloading
+                    double transmissionTime = 0.0;
+                    if (!vmType.equals("IoT")) {
+                        if (vmType.equals("Fog")) {
+                            transmissionTime = IOT_TO_FOG_LATENCY;
+                        } else {
+                            transmissionTime = IOT_TO_FOG_LATENCY + FOG_TO_CLOUD_LATENCY;
+                        }
+                        transmissionTime += (cloudlet.getCloudletFileSize() + cloudlet.getCloudletOutputSize()) / 1000.0;
+                    }
+                    
+                    detailedWriter.println(indent + indent + "Task ID: " + cloudlet.getCloudletId() + 
+                         ", Status: " + (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS ? "SUCCESS" : "FAILED") +
+                         ", VM: " + vmType + "-" + cloudlet.getVmId() +
+                         ", Time: " + dft.format(executionTime) + " ms" +
+                         ", Transmission: " + dft.format(transmissionTime) + " ms" +
+                         ", Energy: " + dft.format(taskEnergy) + " J");
+                }
+                
+                // Write the summary to the detailed results file
+                detailedWriter.println();
+                detailedWriter.println(indent + "========== Summary ==========");
+                detailedWriter.println(indent + "Performance Metrics:");
+                detailedWriter.println(indent + "Average Execution Time: " + dft.format(totalExecutionTime/size) + " ms");
+                detailedWriter.println(indent + "Min Execution Time: " + dft.format(minExecutionTime) + " ms");
+                detailedWriter.println(indent + "Max Execution Time: " + dft.format(maxExecutionTime) + " ms");
+                detailedWriter.println(indent + "Execution Time Variance: " + dft.format(maxExecutionTime - minExecutionTime) + " ms");
+                detailedWriter.println(indent + "Average Transmission Time: " + dft.format(totalTransmissionTime/size) + " ms");
+                
+                detailedWriter.println();
+                detailedWriter.println(indent + "Energy Metrics:");
+                detailedWriter.println(indent + "Average Energy Consumption: " + dft.format(totalEnergy/size) + " J");
+                detailedWriter.println(indent + "Total Energy Consumption: " + dft.format(totalEnergy) + " J");
+                for (Map.Entry<String, Double> entry : tierEnergy.entrySet()) {
+                    if (entry.getValue() > 0) {
+                        detailedWriter.println(indent + entry.getKey() + " Tier Energy: " + dft.format(entry.getValue()) + " J");
+                    }
+                }
+                
+                detailedWriter.println();
+                detailedWriter.println(indent + "Resource Utilization:");
+                detailedWriter.println(indent + "Total MI Processed: " + dft.format(totalMipsUsed) + " MI");
+                detailedWriter.println(indent + "Average MI Per Task: " + dft.format(totalMipsUsed/size) + " MI");
+                detailedWriter.println(indent + "Total Storage Used: " + dft.format(totalStorageUsed/1024.0) + " KB");
+                detailedWriter.println(indent + "Average Bandwidth Used: " + 
+                    dft.format((totalStorageUsed/1024.0)/(totalExecutionTime/1000.0)) + " KB/s");
+                
+                detailedWriter.println();
+                detailedWriter.println(indent + "Economic Metrics:");
+                detailedWriter.println(indent + "Total Cost: $" + dft.format(totalCost));
+                detailedWriter.println(indent + "Average Cost Per Task: $" + dft.format(totalCost/size));
+                detailedWriter.println(indent + "Cost Efficiency (MI/$): " + dft.format(totalMipsUsed/totalCost) + " MI/$");
+                
+                // Print task distribution by VM type
+                detailedWriter.println();
+                detailedWriter.println(indent + "Task Distribution:");
+                for (Map.Entry<String, Integer> entry : deviceTypeCount.entrySet()) {
+                    double percentage = (double)entry.getValue() / size * 100;
+                    detailedWriter.println(indent + entry.getKey() + ": " + entry.getValue() + " tasks (" + 
+                        dft.format(percentage) + "%)");
+                }
+                detailedWriter.close();
+                
+                // Save performance metrics CSV
+                performanceMetricsCsv = new FileWriter("results/" + policyName.replace(" ", "_") + "_performance.csv");
+                PrintWriter perfWriter = new PrintWriter(performanceMetricsCsv);
+                perfWriter.println("Metric,Value,Unit");
+                perfWriter.println("Average Execution Time," + dft.format(totalExecutionTime/size) + ",ms");
+                perfWriter.println("Min Execution Time," + dft.format(minExecutionTime) + ",ms");
+                perfWriter.println("Max Execution Time," + dft.format(maxExecutionTime) + ",ms");
+                perfWriter.println("Execution Time Variance," + dft.format(maxExecutionTime - minExecutionTime) + ",ms");
+                perfWriter.println("Average Transmission Time," + dft.format(totalTransmissionTime/size) + ",ms");
+                perfWriter.close();
+                
+                // Save energy metrics CSV
+                energyMetricsCsv = new FileWriter("results/" + policyName.replace(" ", "_") + "_energy.csv");
+                PrintWriter energyWriter = new PrintWriter(energyMetricsCsv);
+                energyWriter.println("Tier,Energy,Unit");
+                for (Map.Entry<String, Double> entry : tierEnergy.entrySet()) {
+                    if (entry.getValue() > 0) {
+                        energyWriter.println(entry.getKey() + "," + dft.format(entry.getValue()) + ",J");
+                    }
+                }
+                energyWriter.println("Total," + dft.format(totalEnergy) + ",J");
+                energyWriter.close();
+                
+                // Save task distribution CSV
+                taskDistributionCsv = new FileWriter("results/" + policyName.replace(" ", "_") + "_distribution.csv");
+                PrintWriter distWriter = new PrintWriter(taskDistributionCsv);
+                distWriter.println("Tier,Tasks,Percentage");
+                for (Map.Entry<String, Integer> entry : deviceTypeCount.entrySet()) {
+                    double percentage = (double)entry.getValue() / size * 100;
+                    distWriter.println(entry.getKey() + "," + entry.getValue() + "," + dft.format(percentage));
+                }
+                distWriter.close();
+                
+                // Save resource utilization CSV
+                resourceUtilizationCsv = new FileWriter("results/" + policyName.replace(" ", "_") + "_resources.csv");
+                PrintWriter resWriter = new PrintWriter(resourceUtilizationCsv);
+                resWriter.println("Metric,Value,Unit");
+                resWriter.println("Total MI Processed," + dft.format(totalMipsUsed) + ",MI");
+                resWriter.println("Average MI Per Task," + dft.format(totalMipsUsed/size) + ",MI");
+                resWriter.println("Total Storage Used," + dft.format(totalStorageUsed/1024.0) + ",KB");
+                resWriter.println("Average Bandwidth," + dft.format((totalStorageUsed/1024.0)/(totalExecutionTime/1000.0)) + ",KB/s");
+                resWriter.close();
+                
+                System.out.println("\nResults saved to results/ directory. CSV files are ready for graphing.");
+                
+            } catch (IOException e) {
+                System.err.println("Error writing results to file: " + e.getMessage());
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (detailedResultsFile != null) detailedResultsFile.close();
+            if (summaryFile != null) summaryFile.close();
+            if (taskDistributionCsv != null) taskDistributionCsv.close();
+            if (energyMetricsCsv != null) energyMetricsCsv.close();
+            if (performanceMetricsCsv != null) performanceMetricsCsv.close();
+            if (resourceUtilizationCsv != null) resourceUtilizationCsv.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
