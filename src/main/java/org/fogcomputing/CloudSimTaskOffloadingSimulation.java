@@ -362,8 +362,8 @@ public class CloudSimTaskOffloadingSimulation {
         System.out.println("Fog tier: " + fogTaskCount + " tasks");
         System.out.println("IoT tier: " + iotTaskCount + " tasks");
         
-        // Configure network topology
-        configureNetworkTopology();
+        // Configure network topology for datacenter communication
+        configureNetworkTopology(iotDcId, fogDcId, cloudDcId);
         
         // Submit cloudlets to broker
         System.out.println("\nSubmitting " + cloudletList.size() + " cloudlets to broker\n");
@@ -725,15 +725,37 @@ public class CloudSimTaskOffloadingSimulation {
     /**
      * Configure network topology with appropriate latencies between datacenter tiers.
      */
-    private static void configureNetworkTopology() {
-        // Initialize the network topology
-        NetworkTopology.buildNetworkTopology("topology.brite");
-        
-        // Set latencies between datacenters
-        // IoT to Fog
-        NetworkTopology.addLink(1, 2, IOT_TO_FOG_LATENCY, 1000);
-        // Fog to Cloud
-        NetworkTopology.addLink(2, 3, FOG_TO_CLOUD_LATENCY, 10000);
+    private static void configureNetworkTopology(int iotDcId, int fogDcId, int cloudDcId) {
+        try {
+            // Instead of using a BRITE file which limits node counts,
+            // we'll directly configure the network links with specified latencies
+            
+            System.out.println("Setting up network topology with datacenter IDs: IoT=" + iotDcId + 
+                              ", Fog=" + fogDcId + ", Cloud=" + cloudDcId);
+                              
+            // Set up the matrix directly instead of using the BRITE file
+            // This allows us to avoid the array index out of bounds issues
+            
+            // First, register all entities so we can add links between them
+            NetworkTopology.mapNode(cloudDcId, 0);
+            NetworkTopology.mapNode(fogDcId, 1);
+            NetworkTopology.mapNode(iotDcId, 2);
+            
+            // Now add links with appropriate latencies
+            // IoT to Fog link
+            NetworkTopology.addLink(iotDcId, fogDcId, IOT_TO_FOG_LATENCY, 1000); // 1000 Mbps bandwidth
+            System.out.println("Added network link from IoT to Fog with latency " + IOT_TO_FOG_LATENCY + " ms");
+            
+            // Fog to Cloud link
+            NetworkTopology.addLink(fogDcId, cloudDcId, FOG_TO_CLOUD_LATENCY, 10000); // 10000 Mbps bandwidth
+            System.out.println("Added network link from Fog to Cloud with latency " + FOG_TO_CLOUD_LATENCY + " ms");
+            
+            System.out.println("Network topology successfully configured");
+        } catch (Exception e) {
+            System.err.println("Error configuring network topology: " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("Continuing simulation without network topology");
+        }
     }
     
     /**
